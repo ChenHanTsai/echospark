@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EchoSpark - AI Message Refiner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+  <script src="messages.js" defer></script>
+  <script>
+    let status = { late: "no", complete: "yes" };
+
+    function selectOption(type, value) {
+      status[type] = value;
+      const groupId = type === "late" ? "lateGroup" : "completeGroup";
+      const buttons = document.getElementById(groupId).querySelectorAll("button");
+
+      buttons.forEach(btn => {
+        btn.classList.remove("active");
+        if (btn.textContent.toLowerCase() === value) {
+          btn.classList.add("active");
+        }
+      });
+    }
+
+    function generateMessage() {
+      let name = document.getElementById("studentName").value.trim();
+      const greeting = name ? `Hi ${name},` : `Hi there,`;
+
+      let category = status.complete === "no"
+        ? "notComplete"
+        : status.late === "yes"
+        ? "lateComplete"
+        : "onTimeComplete";
+
+      const pool = messages[category];
+      const selected = pool[Math.floor(Math.random() * pool.length)];
+      const fullMessage = `${greeting} ${selected}`;
+      document.getElementById("customInput").value = fullMessage;
+      document.getElementById("copyBtn").style.display = "inline-block";
+    }
+
+    function refineMessage() {
+      const raw = document.getElementById("customInput").value.trim();
+      if (!raw) return;
+
+      const refined = raw
+        .replace(/\s+/g, ' ')
+        .replace(/^\w/, c => c.toUpperCase())
+        .replace(/\.?$/, '.');
+
+      document.getElementById("customInput").value = refined + " 🎓";
+    }
+
+    function copyMessage() {
+      const message = document.getElementById("customInput").value;
+      navigator.clipboard.writeText(message).then(() => {
+        const btn = document.getElementById("copyBtn");
+        btn.textContent = "Copied!";
+        setTimeout(() => {
+          btn.textContent = "Copy Message";
+        }, 1500);
+      });
+    }
+
+    window.onload = () => {
+      selectOption("late", "no");
+      selectOption("complete", "yes");
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #121212;
+      color: #eaeaea;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 32px;
+      color: #ffffff;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 500;
+      color: #cccccc;
+    }
+    input, textarea {
+      padding: 10px;
+      width: 100%;
+      font-size: 15px;
+      margin-top: 8px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #eaeaea;
+      border-radius: 6px;
+    }
+    .option-group {
+      margin-top: 10px;
+    }
+    .option-group button {
+      margin-right: 12px;
+      margin-top: 8px;
+      padding: 8px 16px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      color: #cccccc;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .option-group button.active {
+      background-color: #3b82f6;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    .actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+    }
+    button {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #059669;
+    }
+    #copyBtn {
+      background-color: #6366f1;
+    }
+    #copyBtn:hover {
+      background-color: #4f46e5;
+    }
+    #customInput {
+      margin-top: 24px;
+    }
+    button#generateBtn {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>EchoSpark: AI Message Refiner</h1>
+
+  <label>Student Name:</label>
+  <input type="text" id="studentName" />
+
+  <label>Was it submitted late?</label>
+  <div class="option-group" id="lateGroup">
+    <button onclick="selectOption('late', 'no')">No</button>
+    <button onclick="selectOption('late', 'yes')">Yes</button>
+  </div>
+
+  <label>Is it complete?</label>
+  <div class="option-group" id="completeGroup">
+    <button onclick="selectOption('complete', 'yes')">Yes</button>
+    <button onclick="selectOption('complete', 'no')">No</button>
+  </div>
+
+  <button onclick="generateMessage()" id="generateBtn">Generate</button>
+
+  <label style="margin-top: 24px;">Your Message (editable):</label>
+  <textarea id="customInput" rows="4" placeholder="Your message will appear here..."></textarea>
+
+  <div class="actions">
+    <button onclick="refineMessage()">Refine</button>
+    <button id="copyBtn" onclick="copyMessage()" style="display:none;">Copy Message</button>
+  </div>
+</body>
+</html>
